@@ -10,11 +10,15 @@ import java.io.*;
 
 public class OpeningWindow extends JFrame{
 	
+	public JFrame frame1; 
 	public JLabel label;
 	public JPanel panel;
-	public JButton option1, option2, option3, option4, option5;
-	public String fileName;
-	public boolean namesLoaded;
+	public JButton option1, option2, option3;
+	static public JButton option4;
+	static public String fileName;
+	static public boolean namesLoaded;
+	static public Users currentUser;
+	static public boolean startGame;
 	
 	private class Listener implements ActionListener
 	{		
@@ -23,62 +27,16 @@ public class OpeningWindow extends JFrame{
 			//What to do when button is pressed 	
 			if(e.getSource() == option1)
 			{
-				JFileChooser fc = new JFileChooser();
-				int result = fc.showOpenDialog(null);
-				if(result == JFileChooser.OPEN_DIALOG)  
-				{ 
-					// set the label to the path of the selected file 
-					fileName = (fc.getSelectedFile().getAbsolutePath()).toString(); 
-					try {
-						int numStrings = 0;
-						File file = new File(fileName);
-						BufferedReader buf = new BufferedReader(new FileReader(file)); 
-						String st = ""; 
-						while ((st = buf.readLine()) != null) 
-							numStrings++ ;
-						String msg = "File Loaded successfully, " + numStrings + " strings found";
-						JOptionPane.showMessageDialog(null, msg, "Load File", JOptionPane.INFORMATION_MESSAGE);
-						if(numStrings > 0)
-							namesLoaded = true;
-						else
-							JOptionPane.showMessageDialog(null, msg, "Load File with valid strings", JOptionPane.INFORMATION_MESSAGE);
-						if(namesLoaded == true)
-							option5.setEnabled(true);
-					}
-					catch (FileNotFoundException ex) {
-			            ex.printStackTrace();
-			        } catch (IOException ex) {
-			            ex.printStackTrace();
-			        } 
-				} 
+				Users temp = new Users();
+				temp.loadFile();
+					
 			}			
 			else if(e.getSource() == option2)
 			{
 				Users temp = new Users();
 				temp.Display();
-			}
+			}			
 			else if(e.getSource() == option3)
-			{
-				Users temp = new Users();	
-				String userName = "";
-		        
-	        	int numEntries = temp.readScoreboard();
-	        	if(numEntries == 10)
-	        	{
-	        		int r = JOptionPane.showConfirmDialog(null, "Are you sure you want to replace the last user name?");
-					if(r == JOptionPane.YES_OPTION)
-					{
-						userName = JOptionPane.showInputDialog("Enter User Name");
-			            temp.addUser(userName);
-					}
-	        	}
-	        	else
-	        	{
-	        		userName = JOptionPane.showInputDialog("Enter User Name");
-		            temp.addUser(userName);
-	        	}		
-			}
-			else if(e.getSource() == option4)
 			{
 				int r = JOptionPane.showConfirmDialog(null, "Are you sure you want to leave?");
 				if(r == JOptionPane.YES_OPTION)
@@ -89,14 +47,26 @@ public class OpeningWindow extends JFrame{
 			}
 			else
 			{
-				MainGame obj = new MainGame();
-				obj.startGame(fileName);
+				//remove the previous JFrame
+				frame1.setVisible(false);
+				//frame1.dispose();
+				
+				startGame = true;   
 			}
 	    }
 	}
-	
+	public OpeningWindow(boolean b)
+	{
+		//just an optional constructor that can be called if the menu is not required 
+	}
 	public OpeningWindow()
-	{		
+	{	
+		
+		currentUser = new Users(false);
+		startGame = false;
+		fileName = "C:\\Program Files\\GuessingGame\\Names.txt";
+		
+		frame1 = new JFrame();
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 		
@@ -104,26 +74,20 @@ public class OpeningWindow extends JFrame{
 		GridBagLayout layout = new GridBagLayout();  
 		GridBagConstraints gbc = new GridBagConstraints();  
 		panel.setLayout(layout);
-		option1 = new JButton("Load Input File");
+		option1 = new JButton("Login");
 		option1.setPreferredSize(new Dimension(150, 50));
 		option1.addActionListener(new Listener());
 		option2 = new JButton("Highest Scores");
 		option2.setPreferredSize(new Dimension(150, 50));
-		option2.addActionListener(new Listener());
-		option3 = new JButton("Add User");
+		option2.addActionListener(new Listener());		
+		option3 = new JButton("Exit Game");
 		option3.setPreferredSize(new Dimension(150, 50));
-		option3.addActionListener(new Listener());
-		
-		option5 = new JButton("Start Game");
-		option5.setPreferredSize(new Dimension(150, 50));
-		option5.addActionListener(new Listener());
-		option5.setEnabled(false);
-		
-		option4 = new JButton("Exit Game");
+		option3.addActionListener(new Listener());    
+		option4 = new JButton("Start Game");
 		option4.setPreferredSize(new Dimension(150, 50));
 		option4.addActionListener(new Listener());
+		option4.setEnabled(true);
 		
-         
         gbc.fill = GridBagConstraints.VERTICAL;  
         gbc.gridx = 0;  
         gbc.gridy = 0;		
@@ -135,10 +99,7 @@ public class OpeningWindow extends JFrame{
         gbc.gridy = 8;
 		panel.add(option3, gbc);
 		gbc.gridx = 0;  
-        gbc.gridy = 12;
-		panel.add(option5, gbc);
-		gbc.gridx = 0;  
-        gbc.gridy = 16;
+		gbc.gridy = 12;
 		panel.add(option4, gbc);
 		
 		label = new JLabel();
@@ -150,22 +111,15 @@ public class OpeningWindow extends JFrame{
 		mainPanel.add(iconPanel);
 	
 		Image icon = Toolkit.getDefaultToolkit().getImage("C:\\Users\\snbha\\Desktop\\Learning\\Java\\icon.jpg");  
-		this.setIconImage(icon);
-		this.add(mainPanel);
+		frame1.setIconImage(icon);
+		frame1.add(mainPanel);
 		
-		this.setSize(500, 500);
-		this.pack();
-		this.setLocationRelativeTo(null);
-		this.setResizable(false);
-		this.setVisible(true);		
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setTitle("GUESSING GAME");		
-		//this.setBackground(Color.red);
+		frame1.setSize(500, 500);
+		frame1.pack();
+		frame1.setLocationRelativeTo(null);
+		frame1.setResizable(false);
+		frame1.setVisible(true);		
+		frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame1.setTitle("GUESSING GAME");		
 	}
-	
-	public void trialmain() 
-	{
-		new OpeningWindow();
-	}
-	
 }
