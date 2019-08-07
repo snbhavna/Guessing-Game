@@ -1,22 +1,18 @@
 package gamePackage;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.Image;
-import java.awt.LayoutManager;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.concurrent.locks.ReentrantLock;
-
 import javax.swing.*;
 import java.awt.GridBagConstraints;  
 import java.awt.GridBagLayout;  
@@ -36,9 +32,21 @@ public class MainGame{
 	static public int b2;
 	
 	public MainGame()
-	{		
-		b1 = false;
+	{
+		setValue(false);
 		b2 = 0;
+	}
+	
+	public void setValue(boolean flag) {
+	    b1 = flag;
+	    }
+ 
+	public boolean getValue() {
+	    return b1;
+	    }
+
+	public void createForm()
+	{				
 		String []inputLetters = new String[]{
 				"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
 				"N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
@@ -100,20 +108,20 @@ public class MainGame{
 		playAgain.addActionListener(new actionToBeTaken());
 			
 		c.fill = GridBagConstraints.VERTICAL;
+		Image icon = Toolkit.getDefaultToolkit().getImage("files\\icon.jpg");  		
 		
 		mainPanel.add(inputPanel);
 		mainPanel.add(inputPanel2);
 		inputFrame.add(mainPanel);	
+		inputFrame.setIconImage(icon);
 		inputFrame.setSize(500, 700);
 		//inputFrame.pack();
 		inputFrame.setLocationRelativeTo(null);
 		inputFrame.setResizable(false);			
+		inputFrame.setVisible(true);
 		inputFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		inputFrame.setTitle("GUESSING GAME");	
-		Image icon = Toolkit.getDefaultToolkit().getImage("C:\\Users\\snbha\\Desktop\\Learning\\Java\\icon.jpg");  
-		inputFrame.setIconImage(icon);
-		//inputFrame.setBackground(Color.red);
-		inputFrame.setVisible(true);	
+		//inputFrame.setBackground(Color.red);			
 	}
 	private class actionToBeTaken implements ActionListener
 	{
@@ -157,18 +165,18 @@ public class MainGame{
 		Random rand = new Random();
 		boolean success = false;
 		boolean validLetter = false;
-		String temp;		
 		int index = 0, correctLet = 0, j = 0;				
 		int numStrings = 0;
 		String[] list = new String[100];
 		File file = new File(fileName);
-
+		System.out.println("Main game started");
 		try
 		{
 		BufferedReader buf = new BufferedReader(new FileReader(file)); 
 		while ((list[numStrings] = buf.readLine()) != null) 
 			numStrings++ ;
-		
+		buf.close();
+		System.out.println("Strings found = " + numStrings);
 		int n = rand.nextInt(numStrings);
 		char answer[] = new char[2* list[n].length()];
 		j = 0;
@@ -222,11 +230,21 @@ public class MainGame{
 		}
 		catch(FileNotFoundException e)
 		{
-			JOptionPane.showMessageDialog(null, "Input File missing", "Input File Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Something is Wrong. Input File missing", "Input File Error", JOptionPane.ERROR_MESSAGE);
 		}
 		catch(IOException e)
 		{
-			e.printStackTrace();
+			try
+			 {
+				 ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+		                new FileOutputStream(Users.errorFileName));
+				objectOutputStream.writeObject(e);
+				objectOutputStream.close();
+			 }
+			 catch(Exception excp)
+			 {
+				 excp.printStackTrace();
+			 }
 		}
 		while(true)
 		{
@@ -234,9 +252,12 @@ public class MainGame{
 				break;
 		}
 		if(b2 == 1)
-			b1 = true;
+			setValue(true);
 		else
-			OpeningWindow.startGame = true;
+		{
+			OpeningWindow ob = new OpeningWindow(false);
+			ob.setVal(true);
+		}
 		b2 = 0;
 	}
 }

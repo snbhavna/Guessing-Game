@@ -1,43 +1,97 @@
 package gamePackage;
 
-import java.awt.Dimension;
 import java.awt.Image;
-import java.awt.TextField;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+
 import javax.swing.*;
 
-public class Users implements Serializable {
+public class Users implements Serializable{
 	private transient static final long serialVersionUID = 1L;
 	private String userName;
 	private int score;
 	public transient JButton confirm;
 	public transient JButton cancel;
 	public transient JTextField t1;
-	public transient String scoreFileName;
-	public transient String errorFileName;
+	public transient static String scoreFileName;
+	public transient static String errorFileName;
 	public transient JButton loadFile;
 	public transient JFrame f1;
+	public static Logger logger;
+	public static FileHandler fh;
 	
 	public static void main(String[] args)
 	{
 		OpeningWindow o1 = new OpeningWindow();
+		MainGame obj = new MainGame();
+		o1.createOpeningForm();
 		while(true)
 		{
-			if(OpeningWindow.startGame == true)
+			if(o1.getVal() == true)
 			{
-				OpeningWindow.startGame = false;
-				MainGame obj = new MainGame();
-				obj.startGame(OpeningWindow.fileName);
-			}
-			if(MainGame.b1 == true)
-			{
-				MainGame.b1 = false;
-				o1.frame1.setVisible(true);
+				//remove the previous JFrame
+				Users.logger.info("Opening frame set to invisible");  
+				o1.frame1.setVisible(false);
+				//frame1.dispose();
+				Users.logger.info("Start main game"); 
+			
+				while(o1.getVal() == true)
+				{
+					try
+					{
+						o1.setVal(false);						
+						obj.createForm();					
+						obj.startGame(OpeningWindow.fileName);
+					}
+					catch(Exception ex)
+					{
+						try
+						{
+							
+							ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+					                new FileOutputStream(Users.errorFileName));
+							objectOutputStream.writeObject(ex);
+							objectOutputStream.close();
+						}
+						catch(Exception excp) {
+							excp.printStackTrace();
+						}
+					}					
+				}
+				if(obj.getValue() == true)
+				{
+					obj.setValue(false);
+					o1.frame1.setVisible(true);
+				}
 			}
 		}
+		//Users.fh.close();
+		//MainGame o2 = new MainGame();
+		//o2.createForm();
+//		while(true);
+//		{
+//			if(OpeningWindow.startGame == true) 
+//				Users.logger.info("Start game is true");  
+//			if (MainGame.b1 == true)
+//				Users.logger.info("Game over");  
+//			if(OpeningWindow.startGame == true)
+//			{				
+//				OpeningWindow.startGame = false;
+//				logger.info("Main game to be started");  
+//				MainGame obj = new MainGame();
+//				logger.info("Here it comes"); 
+//				obj.startGame(OpeningWindow.fileName);
+//			}
+//			if(MainGame.b1 == true)
+//			{
+//				MainGame.b1 = false;
+//				o1.frame1.setVisible(true);
+//			}
+//		}
 	}
 	
 	public String toString() {
@@ -71,42 +125,7 @@ public class Users implements Serializable {
 					m = "Welcome " + OpeningWindow.currentUser.userName; 
 					JOptionPane.showMessageDialog(null, m, "Login", JOptionPane.INFORMATION_MESSAGE);
 				}
-			}
-			/* else if(e.getSource() == loadFile) //feature not used as of now
-			{
-				JFileChooser fc = new JFileChooser();
-				int result = fc.showOpenDialog(null);
-				if(result == JFileChooser.OPEN_DIALOG)  
-				{ 
-					// set the label to the path of the selected file 
-					OpeningWindow.fileName = (fc.getSelectedFile().getAbsolutePath()).toString(); 
-					try {
-						int numStrings = 0;
-						File file = new File(OpeningWindow.fileName);
-						BufferedReader buf = new BufferedReader(new FileReader(file)); 
-						String st = ""; 
-						while ((st = buf.readLine()) != null) 
-							numStrings++ ;
-						String msg = "File Loaded successfully, " + numStrings + " strings found";
-						JOptionPane.showMessageDialog(null, msg, "Load File", JOptionPane.INFORMATION_MESSAGE);
-						if(numStrings > 0)
-						{
-							f1.setVisible(false);
-							f1.dispose();
-							OpeningWindow.namesLoaded = true;
-						}
-						else
-							JOptionPane.showMessageDialog(null, msg, "Load File with valid strings", JOptionPane.INFORMATION_MESSAGE);
-						if(OpeningWindow.namesLoaded == true)
-							OpeningWindow.option4.setEnabled(true);
-					}
-					catch (FileNotFoundException ex) {
-			            ex.printStackTrace();
-			        } catch (IOException ex) {
-			            ex.printStackTrace();
-			        } 
-				}
-			}*/
+			}			
 			else if (e.getSource() == cancel)
 			{
 				f1.setVisible(false);
@@ -119,14 +138,15 @@ public class Users implements Serializable {
 	{
 		this.userName = "ADMIN";
 		this.score = 0;
-		this.scoreFileName = "C:\\Users\\snbha\\Desktop\\Learning\\Java\\Scores.txt";
+		scoreFileName = "files\\Scores.txt";
 	}
 	
 	public Users()
-	{		
+	{				
 		userName = "";
 		score = 0;
-		scoreFileName = "C:\\Users\\snbha\\Desktop\\Learning\\Java\\Scores.txt";
+		scoreFileName = "files\\Scores.txt";
+		errorFileName = "files\\Error.txt";	  
 		try
 		{
 			File tempFile = new File(scoreFileName);
@@ -134,7 +154,16 @@ public class Users implements Serializable {
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			try
+			{
+				ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+		                new FileOutputStream(errorFileName));
+				objectOutputStream.writeObject(e);
+				objectOutputStream.close();
+			}
+			catch(Exception excp) {
+				excp.printStackTrace();
+			}
 		}
 	}
 	
@@ -161,7 +190,7 @@ public class Users implements Serializable {
 		//p1.add(loadFile);
 		p1.add(cancel);
 	
-		Image icon = Toolkit.getDefaultToolkit().getImage("C:\\Users\\snbha\\Desktop\\Learning\\Java\\icon.jpg");  
+		Image icon = Toolkit.getDefaultToolkit().getImage("files\\icon.jpg");  
 		f1.setIconImage(icon);
 		f1.add(p1);
 		
@@ -178,7 +207,7 @@ public class Users implements Serializable {
 	{
 		Users[] listUsers = new Users[10];
 		int i = 0;
-        
+		Users.logger.info("Add user to list");  
 		try {
 			ObjectInputStream objectInputStream = new ObjectInputStream(
 			        new FileInputStream(scoreFileName));
@@ -188,14 +217,27 @@ public class Users implements Serializable {
 			{
 				listUsers[i] = (Users) objectInputStream.readObject();
 				if(listUsers[i].userName.compareTo(name) == 0)
+				{
+					objectInputStream.close();	
 					return false;
+				}
 				i++;
 			}
 			objectInputStream.close();			
 	        
 		}
 		 catch (FileNotFoundException ex) {
-            ex.printStackTrace();
+			 try
+			 {
+				 ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+		                new FileOutputStream(Users.errorFileName));
+				objectOutputStream.writeObject(ex);
+				objectOutputStream.close();
+			 }
+			 catch(Exception excp)
+			 {
+				 excp.printStackTrace();
+			 }
         } catch (IOException ex) {
             if(i < 10)
             {
@@ -217,11 +259,31 @@ public class Users implements Serializable {
 			}
             catch(Exception exe)
 			{
-            	 exe.printStackTrace();
+            	try
+	   			 {
+	   				 ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+	   		                new FileOutputStream(Users.errorFileName));
+	   				objectOutputStream.writeObject(exe);
+	   				objectOutputStream.close();
+	   			 }
+	   			 catch(Exception excp)
+	   			 {
+	   				 excp.printStackTrace();
+	   			 }
 			}
         } catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+        	try
+			 {
+				 ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+		                new FileOutputStream(Users.errorFileName));
+				objectOutputStream.writeObject(e);
+				objectOutputStream.close();
+			 }
+			 catch(Exception excp)
+			 {
+				 excp.printStackTrace();
+			 }
 		} 
 		return true;
 	}
@@ -229,8 +291,9 @@ public class Users implements Serializable {
 	public void updateScore(Users user)
 	{
 		Users[] players = new Users[10];
-		int i = 0, j = 0;
-		
+		Users temp = new Users();
+		int i = 0, j = 0, k = 0;
+		Users.logger.info("Upate score");  
 		try {
 			ObjectInputStream objectInputStream = new ObjectInputStream(
 			        new FileInputStream(scoreFileName));
@@ -241,11 +304,31 @@ public class Users implements Serializable {
             }
             objectInputStream.close();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        	try
+			 {
+				 ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+		                new FileOutputStream(Users.errorFileName));
+				objectOutputStream.writeObject(e);
+				objectOutputStream.close();
+			 }
+			 catch(Exception excp)
+			 {
+				 excp.printStackTrace();
+			 }
         } catch (IOException e) {
         	; //will be handled below
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        	try
+			 {
+				 ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+		                new FileOutputStream(Users.errorFileName));
+				objectOutputStream.writeObject(e);
+				objectOutputStream.close();
+			 }
+			 catch(Exception excp)
+			 {
+				 excp.printStackTrace();
+			 }
         } 
 		for(j = 0; j < i; j++)
 		{
@@ -255,6 +338,19 @@ public class Users implements Serializable {
 		if (j < i)
 		{
 			players[j].score++;
+		}
+		//sort the players in descending order
+		for(j = 0; j < i; j++)
+		{
+			for(k = j+1; k < i; k++)
+			{
+				if(players[j].score < players[k].score)
+				{
+					temp = players[j];
+					players[j] = players[k];
+					players[k] = temp;
+				}
+			}
 		}
 		try
 		{
@@ -269,7 +365,17 @@ public class Users implements Serializable {
 		}
         catch(Exception exe)
 		{
-        	 exe.printStackTrace();
+        	try
+			 {
+				 ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+		                new FileOutputStream(Users.errorFileName));
+				objectOutputStream.writeObject(exe);
+				objectOutputStream.close();
+			 }
+			 catch(Exception excp)
+			 {
+				 excp.printStackTrace();
+			 }
 		}
 	}
 	
@@ -280,7 +386,7 @@ public class Users implements Serializable {
 		 */
 		Users[] players = new Users[10];
 		int i = 0;
-		
+		Users.logger.info("Read scoreboard");  
 		try {
 			ObjectInputStream objectInputStream = new ObjectInputStream(
 			        new FileInputStream(scoreFileName));
@@ -291,11 +397,31 @@ public class Users implements Serializable {
             }
             objectInputStream.close();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        	try
+			 {
+				 ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+		                new FileOutputStream(Users.errorFileName));
+				objectOutputStream.writeObject(e);
+				objectOutputStream.close();
+			 }
+			 catch(Exception excp)
+			 {
+				 excp.printStackTrace();
+			 }
         } catch (IOException e) {
         	return 0;
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        	try
+			 {
+				 ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+		                new FileOutputStream(Users.errorFileName));
+				objectOutputStream.writeObject(e);
+				objectOutputStream.close();
+			 }
+			 catch(Exception excp)
+			 {
+				 excp.printStackTrace();
+			 }
         } 
         return i;
 	}
@@ -307,7 +433,7 @@ public class Users implements Serializable {
 		 */
 		Users[] players = new Users[10];
 		int i = 0;
-		
+		logger.info("Display user list");  
 		try {
 			ObjectInputStream objectInputStream = new ObjectInputStream(
 			        new FileInputStream(scoreFileName));
@@ -318,7 +444,17 @@ public class Users implements Serializable {
             }                     
 			 objectInputStream.close();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        	try
+			 {
+				 ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+		                new FileOutputStream(Users.errorFileName));
+				objectOutputStream.writeObject(e);
+				objectOutputStream.close();
+			 }
+			 catch(Exception excp)
+			 {
+				 excp.printStackTrace();
+			 }
         } catch (IOException e) {
         	if(i == 0)
         	{
@@ -334,7 +470,17 @@ public class Users implements Serializable {
         		JOptionPane.showMessageDialog(null, msg, "Highest Scores", JOptionPane.INFORMATION_MESSAGE);
         	}
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        	try
+			 {
+				 ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+		                new FileOutputStream(Users.errorFileName));
+				objectOutputStream.writeObject(e);
+				objectOutputStream.close();
+			 }
+			 catch(Exception excp)
+			 {
+				 excp.printStackTrace();
+			 }
         } 
 	} 	
 	

@@ -1,15 +1,19 @@
 package gamePackage;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.GridLayout;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*; 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
-public class OpeningWindow extends JFrame{
-	
+public class OpeningWindow extends JFrame {
+	private transient static final long serialVersionUID = 1L;
 	public JFrame frame1; 
 	public JLabel label;
 	public JPanel panel;
@@ -18,7 +22,15 @@ public class OpeningWindow extends JFrame{
 	static public String fileName;
 	static public boolean namesLoaded;
 	static public Users currentUser;
-	static public boolean startGame;
+	static public boolean startGameCh;
+	
+	public void setVal(boolean flag) {
+		    startGameCh = flag;
+		    }
+	 
+	 public boolean getVal() {
+		    return startGameCh;
+		    }
 	
 	private class Listener implements ActionListener
 	{		
@@ -28,17 +40,20 @@ public class OpeningWindow extends JFrame{
 			if(e.getSource() == option1)
 			{
 				Users temp = new Users();
+				Users.logger.info("Load File");  
 				temp.loadFile();
 					
 			}			
 			else if(e.getSource() == option2)
 			{
 				Users temp = new Users();
+				Users.logger.info("Display users list");  
 				temp.Display();
 			}			
 			else if(e.getSource() == option3)
 			{
 				int r = JOptionPane.showConfirmDialog(null, "Are you sure you want to leave?");
+				Users.logger.info("Exit Game");  
 				if(r == JOptionPane.YES_OPTION)
 				{
 					JOptionPane.showMessageDialog(null, "Will miss you! Come back soon!", "Bye Bye", JOptionPane.INFORMATION_MESSAGE);
@@ -46,12 +61,8 @@ public class OpeningWindow extends JFrame{
 				}
 			}
 			else
-			{
-				//remove the previous JFrame
-				frame1.setVisible(false);
-				//frame1.dispose();
-				
-				startGame = true;   
+			{			
+				setVal(true);   				
 			}
 	    }
 	}
@@ -61,11 +72,35 @@ public class OpeningWindow extends JFrame{
 	}
 	public OpeningWindow()
 	{	
-		
+		try
+		{
+			Users.logger = Logger.getLogger("MyLog");  
+			Users.fh = new FileHandler("files\\JavaMyLogFile.log");  
+			Users.logger.addHandler(Users.fh);
+	        SimpleFormatter formatter = new SimpleFormatter();  
+	        Users.fh.setFormatter(formatter);  
+	
+	        // the following statement is used to log any messages  
+	        Users.logger.info("Log starts for Game");  
+		 } catch (Exception e) {  
+			 try
+			 {
+				 ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+			                new FileOutputStream(Users.errorFileName));
+				 objectOutputStream.writeObject(e);
+				 objectOutputStream.close();
+			 } 
+			 catch (Exception ex) {  
+		        ex.printStackTrace();  
+			 }
+		    }  
 		currentUser = new Users(false);
-		startGame = false;
-		fileName = "C:\\Program Files\\GuessingGame\\Names.txt";
-		
+		setVal(false);
+		fileName = "pvt\\Names.txt";
+	}
+	
+	public void createOpeningForm()
+	{		
 		frame1 = new JFrame();
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
@@ -103,14 +138,14 @@ public class OpeningWindow extends JFrame{
 		panel.add(option4, gbc);
 		
 		label = new JLabel();
-		label.setIcon(new ImageIcon(new ImageIcon("C:\\Users\\snbha\\Desktop\\Learning\\Java\\icon.jpg").getImage().getScaledInstance(100, 100, Image.SCALE_DEFAULT)));
+		label.setIcon(new ImageIcon(new ImageIcon("files\\icon.jpg").getImage().getScaledInstance(100, 100, Image.SCALE_DEFAULT)));
 		JPanel iconPanel = new JPanel();
 		iconPanel.add(label);
 		
 		mainPanel.add(panel);
 		mainPanel.add(iconPanel);
 	
-		Image icon = Toolkit.getDefaultToolkit().getImage("C:\\Users\\snbha\\Desktop\\Learning\\Java\\icon.jpg");  
+		Image icon = Toolkit.getDefaultToolkit().getImage("files\\icon.jpg");  
 		frame1.setIconImage(icon);
 		frame1.add(mainPanel);
 		
@@ -118,8 +153,17 @@ public class OpeningWindow extends JFrame{
 		frame1.pack();
 		frame1.setLocationRelativeTo(null);
 		frame1.setResizable(false);
+		
+		WindowListener exitListener = new WindowAdapter() {
+		    @Override
+		    public void windowClosing(WindowEvent e) {
+		        Users.fh.close();
+		    }
+		};
+		frame1.addWindowListener(exitListener);
+		
 		frame1.setVisible(true);		
 		frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame1.setTitle("GUESSING GAME");		
+		frame1.setTitle("GUESSING GAME");			
 	}
 }
