@@ -19,22 +19,23 @@ import java.awt.GridBagLayout;
 
 public class MainGame{
 	
-	public JFrame inputFrame;
-	public JPanel mainPanel;
-	public JPanel inputPanel;
-	public JPanel inputPanel2;
-	public JButton[] letters;
-	public JLabel l1, l2;
-	public boolean input;
-	char readChar;
-	public JButton exit, back, playAgain;
-	static public boolean b1;
-	static public int b2;
+	private JFrame inputFrame;
+	private JPanel mainPanel;
+	private JPanel inputPanel;
+	private JPanel inputPanel2;
+	private JLabel l1, l2;
+	volatile private boolean input;
+	private char readChar;
+	private JButton exit, back, playAgain;
+	volatile private boolean b1;
+	volatile private int b2;
+	private String fileName;
 	
 	public MainGame()
 	{
 		setValue(false);
 		b2 = 0;
+		fileName = "pvt\\Names.txt";
 	}
 	
 	public void setValue(boolean flag) {
@@ -44,6 +45,16 @@ public class MainGame{
 	public boolean getValue() {
 	    return b1;
 	    }
+	
+	public boolean getB2() {
+		if(b2 == 2)
+		{
+			b2 = 0;
+			return true;
+		}
+		else
+			return false;
+	}
 
 	public void createForm()
 	{				
@@ -160,7 +171,7 @@ public class MainGame{
 			lock.unlock();
 	    }
 	}
-	public void startGame(String fileName)
+	public void startGame()
 	{
 		Random rand = new Random();
 		boolean success = false;
@@ -252,12 +263,9 @@ public class MainGame{
 				break;
 		}
 		if(b2 == 1)
-			setValue(true);
-		else
 		{
-			OpeningWindow ob = new OpeningWindow(false);
-			ob.setVal(true);
-		}
-		b2 = 0;
+			setValue(true);
+			b2 = 0;
+		}		
 	}
 }

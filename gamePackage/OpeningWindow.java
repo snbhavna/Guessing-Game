@@ -14,19 +14,21 @@ import java.util.logging.SimpleFormatter;
 
 public class OpeningWindow extends JFrame {
 	private transient static final long serialVersionUID = 1L;
-	public JFrame frame1; 
-	public JLabel label;
-	public JPanel panel;
-	public JButton option1, option2, option3;
-	static public JButton option4;
-	static public String fileName;
-	static public boolean namesLoaded;
+	private JFrame frame1; 
+	private JLabel label;
+	private JPanel panel;
+	private JButton option1, option2, option3;
+	private JButton option4;	
 	static public Users currentUser;
-	static public boolean startGameCh;
+	volatile private boolean startGameCh;
 	
 	public void setVal(boolean flag) {
 		    startGameCh = flag;
 		    }
+	
+	public void setFrame(boolean flag) {
+		frame1.setVisible(flag);
+	}
 	 
 	 public boolean getVal() {
 		    return startGameCh;
@@ -95,8 +97,7 @@ public class OpeningWindow extends JFrame {
 			 }
 		    }  
 		currentUser = new Users(false);
-		setVal(false);
-		fileName = "pvt\\Names.txt";
+		setVal(false);		
 	}
 	
 	public void createOpeningForm()

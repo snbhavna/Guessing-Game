@@ -14,13 +14,12 @@ public class Users implements Serializable{
 	private transient static final long serialVersionUID = 1L;
 	private String userName;
 	private int score;
-	public transient JButton confirm;
-	public transient JButton cancel;
-	public transient JTextField t1;
-	public transient static String scoreFileName;
+	private transient JButton confirm;
+	private transient JButton cancel;
+	private transient JTextField t1;
+	private transient static String scoreFileName;
 	public transient static String errorFileName;
-	public transient JButton loadFile;
-	public transient JFrame f1;
+	private transient JFrame f1;
 	public static Logger logger;
 	public static FileHandler fh;
 	
@@ -35,17 +34,17 @@ public class Users implements Serializable{
 			{
 				//remove the previous JFrame
 				Users.logger.info("Opening frame set to invisible");  
-				o1.frame1.setVisible(false);
+				o1.setFrame(false);
 				//frame1.dispose();
 				Users.logger.info("Start main game"); 
 			
-				while(o1.getVal() == true)
+				while((o1.getVal() == true) || (obj.getB2() == true))
 				{
 					try
 					{
 						o1.setVal(false);						
 						obj.createForm();					
-						obj.startGame(OpeningWindow.fileName);
+						obj.startGame();
 					}
 					catch(Exception ex)
 					{
@@ -65,33 +64,10 @@ public class Users implements Serializable{
 				if(obj.getValue() == true)
 				{
 					obj.setValue(false);
-					o1.frame1.setVisible(true);
+					o1.setFrame(true);
 				}
 			}
 		}
-		//Users.fh.close();
-		//MainGame o2 = new MainGame();
-		//o2.createForm();
-//		while(true);
-//		{
-//			if(OpeningWindow.startGame == true) 
-//				Users.logger.info("Start game is true");  
-//			if (MainGame.b1 == true)
-//				Users.logger.info("Game over");  
-//			if(OpeningWindow.startGame == true)
-//			{				
-//				OpeningWindow.startGame = false;
-//				logger.info("Main game to be started");  
-//				MainGame obj = new MainGame();
-//				logger.info("Here it comes"); 
-//				obj.startGame(OpeningWindow.fileName);
-//			}
-//			if(MainGame.b1 == true)
-//			{
-//				MainGame.b1 = false;
-//				o1.frame1.setVisible(true);
-//			}
-//		}
 	}
 	
 	public String toString() {
