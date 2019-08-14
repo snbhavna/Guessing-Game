@@ -167,7 +167,11 @@ public class MainGame{
 			if(o instanceof JButton)
 			     b = (JButton)o;
 		    if(b != null)
+		    {
 			   readChar = b.getText().charAt(0);
+			   b.setText("");
+			   Users.logger.info("2:" + readChar);
+		    }
 			lock.unlock();
 	    }
 	}
@@ -180,15 +184,15 @@ public class MainGame{
 		int numStrings = 0;
 		String[] list = new String[100];
 		File file = new File(fileName);
-		System.out.println("Main game started");
 		try
 		{
+		Users.logger.info("User:" + OpeningWindow.currentUser); 		 
 		BufferedReader buf = new BufferedReader(new FileReader(file)); 
 		while ((list[numStrings] = buf.readLine()) != null) 
 			numStrings++ ;
 		buf.close();
-		System.out.println("Strings found = " + numStrings);
 		int n = rand.nextInt(numStrings);
+		Users.logger.info("Str:" + list[n]);
 		char answer[] = new char[2* list[n].length()];
 		j = 0;
 		for(int i = 0; i < list[n].length(); i++)
@@ -199,11 +203,12 @@ public class MainGame{
 		l1.setText(String.valueOf(answer));			
 		l2.setText ("Guess a letter!");
 		
-		while(!success)
-		{
-			index = 0;
+		while((!success) && (b2 == 0))
+		{			
 			if(input == true)
 			{
+				index = 0;
+				Users.logger.info("1:" + readChar + "," + String.valueOf(answer)+","+index+","+list[n]);
 				input = false;
 				validLetter = false;
 				while(index != list[n].length())
@@ -214,7 +219,7 @@ public class MainGame{
 					{
 							answer[2*index] = readChar;
 							correctLet++;
-							validLetter = true;
+							validLetter = true;							
 					}		
 					index++;
 				}	
